@@ -1,0 +1,67 @@
+<% content_for :title, "Todo Lists" %>
+
+<div class="w-full px-6 py-8 bg-gradient-to-br from-indigo-50 to-purple-100 shadow-xl rounded-xl border border-gray-300">
+  <% if notice.present? %>
+    <p class="py-2 px-4 bg-green-100 text-green-700 font-medium rounded-md mb-5 inline-block shadow-sm animate-pulse" id="notice"><%= notice %></p>
+  <% end %>
+
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="font-extrabold text-4xl text-gray-900 drop-shadow-lg">📋 Todo Lists</h1>
+    <%= link_to "➕ New Todo List", new_todo_list_path, class: "rounded-md px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold shadow-lg transform hover:scale-105 transition duration-300 ease-in-out" %>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full bg-white border border-gray-300 shadow-lg rounded-lg overflow-hidden">
+      <thead class="bg-gradient-to-r from-gray-200 to-gray-300 text-gray-800">
+        <tr>
+          <% ["Name", "Description", "Priority", "Due Date", "Status", "Actions"].each do |heading| %>
+            <th class="py-3 px-6 text-left font-semibold"><%= heading %></th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <% if @todo_lists.any? %>
+          <% @todo_lists.each do |todo_list| %>
+            <tr class="hover:bg-gray-50 transition transform hover:scale-[1.02] duration-200 ease-in-out">
+              <td class="py-4 px-6 font-semibold text-gray-900"><%= todo_list.name %></td>
+              <td class="py-4 px-6 text-gray-700 text-sm truncate max-w-xs"><%= todo_list.description.presence || 'No description' %></td>
+              <td class="py-4 px-6">
+                <span class="<%= todo_list.priority.to_i > 5 ? 'bg-red-200 text-red-700' : 'bg-green-200 text-green-700' %> px-3 py-1 rounded-md text-xs font-semibold shadow">
+                  <%= todo_list.priority %>
+                </span>
+              </td>
+              <td class="py-4 px-6 text-gray-800 font-medium"><%= todo_list.due_date %></td>
+              <td class="py-4 px-6">
+                <% status_classes = { "pending" => "bg-yellow-200 text-yellow-800", "in-progress" => "bg-blue-200 text-blue-800", "completed" => "bg-green-200 text-green-800" } %>
+                <span class="<%= status_classes[todo_list.status] %> px-3 py-1 rounded-md text-xs font-semibold capitalize shadow">
+                  <%= todo_list.status %>
+                </span>
+              </td>
+              <td class="py-4 px-6 flex space-x-2">
+                <%= link_to "👁 Show", todo_list, class: "px-3 py-2 bg-gray-200 hover:bg-gray-300 text-xs font-medium rounded-md transition transform hover:scale-105" %>
+                <%= link_to "✏ Edit", edit_todo_list_path(todo_list), class: "px-3 py-2 bg-yellow-400 hover:bg-yellow-300 text-xs font-medium rounded-md transition transform hover:scale-105" %>
+                <%= button_to "❌ Delete", todo_list, method: :delete, class: "px-3 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-md transition transform hover:scale-105", data: { turbo_confirm: "Are you sure?" } %>
+              </td>
+            </tr>
+          <% end %>
+        <% else %>
+          <tr>
+            <td colspan="6" class="py-6 text-center text-gray-600 text-lg font-medium">🚀 No todo lists found. Add a new one!</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Progress Bar -->
+  <% completed_count = @todo_lists.where(status: 'completed').count.to_f %>
+  <% total_count = @todo_lists.count.to_f %>
+  <% progress = total_count.zero? ? 0 : (completed_count / total_count * 100).round(2) %>
+
+  <div class="w-full mt-8">
+    <p class="text-lg font-semibold text-gray-800 mb-2">Progress: <%= progress %>% ✅</p>
+    <div class="w-full bg-gray-300 rounded-full h-4 shadow-inner relative overflow-hidden">
+      <div class="bg-gradient-to-r from-green-400 to-green-600 h-4 rounded-full absolute left-0 top-0 transition-all duration-500 ease-in-out" style="width: <%= progress %>%"></div>
+    </div>
+  </div>
+</div>
